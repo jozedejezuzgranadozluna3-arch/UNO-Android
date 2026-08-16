@@ -1,0 +1,38 @@
+name: Build UNO APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Descomprimir proyecto
+        run: |
+          unzip -q UNO_Android_GitHub_Actions.zip -d uno
+          find uno -maxdepth 3 -type f | head -50
+
+      - name: Compilar APK
+        working-directory: uno
+        run: gradle :app:assembleDebug
+
+      - name: Guardar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: UNO-debug-apk
+          path: uno/app/build/outputs/apk/debug/app-debug.apk
